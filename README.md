@@ -38,6 +38,11 @@ Overlay on a different host
 ## Commands (chat)
 - `!dig` — join queue or start digging if idle.
 - `!stats` / `!points` — reply with your totals (points, XP, level).
+- `!board [n]` — show the top `n` players by points (default 5, max 10).
+
+Moderator Commands (mods or broadcaster)
+- `!pause` — pause the queue; active dig continues but no new digs start.
+- `!resume` — resume processing; starts next queued dig if idle.
 
 ## How it works
 - Single active digger at a time. Others join FIFO queue (duplicates blocked).
@@ -57,7 +62,7 @@ Overlay on a different host
 
 ## Notes
 - The bot exits if credentials are not set.
-- Add `!top` or admin commands by extending the message handler in `src/index.js`.
+- Add `!board` or admin commands by extending the message handler in `src/index.js`.
 
 ## Contributing
 - Fork the repo and create a feature branch for your change.
@@ -80,7 +85,7 @@ Overlay on a different host
 Customization
 - Edit loot and weights in `src/lootTable.js` to fit your stream’s theme.
 - Adjust per-user cooldown and ports in `src/config.js`.
-- Commands available: `!dig`, `!stats` / `!points`. Add more in `src/index.js`.
+- Commands available: `!dig`, `!stats` / `!points`, `!board`. Add more in `src/index.js`.
 
 Security & Persistence
 - `.env` is ignored by git; never commit your token.

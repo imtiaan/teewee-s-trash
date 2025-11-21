@@ -56,8 +56,16 @@ Persistence
 !stats / !points
 - Replies with the user’s current totals: points, XP, and level.
 
+!board [n]
+- Shows the top `n` players sorted by total points.
+- Default `n = 5`, maximum `n = 10`.
+
+Moderator Commands
+- !pause — Pauses the queue. The current dig completes, but no new digs start.
+- !resume — Resumes the queue and immediately starts the next queued dig if idle.
+
 Admin/Future (not implemented yet)
-- Examples: `!top`, `!resetplayer`, `!addpoints` (can be added later).
+- Examples: `!resetplayer`, `!addpoints` (can be added later).
 
 ## Queue & Cooldown Behavior
 - Queue: FIFO; exactly one active digger at a time.

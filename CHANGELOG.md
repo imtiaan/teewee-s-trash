@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here.
 
+## v0.1.1 – Board + Moderator Controls
+
+### Added
+- Moderator commands: `!pause` and `!resume` (mods/broadcaster only). Pauses queue, resumes processing.
+- Documentation updates in README and `docs/GAMEPLAY.md` covering moderator commands and the `!board` leaderboard.
+
+### Changed
+- Leaderboard command renamed to `!board` (removed `!top` alias).
+
 ## v0.1.0 – First Tagged Release
 
 ### Added

@@ -4,12 +4,13 @@ import tmi from "tmi.js";
 import { WebSocketServer } from "ws";
 import { config } from "./config.js";
 import { pickLoot } from "./lootTable.js";
-import { getOrCreatePlayer, updatePlayerWithLoot, savePlayers } from "./storage.js";
+import { getOrCreatePlayer, updatePlayerWithLoot, savePlayers, getPlayers } from "./storage.js";
 
 const queue = [];
 const displayNames = new Map();
 const userCooldowns = new Map();
 let activePlayer = null;
+let paused = false;
 
 const DIG_DELAY_MS = 1800;
 const NEXT_CHAIN_DELAY_MS = 300;
@@ -72,7 +73,7 @@ const recordCooldown = key => {
 const getQueuePosition = key => queue.indexOf(key) + 1;
 
 const startNextInQueue = () => {
-  if (activePlayer || queue.length === 0) return;
+  if (paused || activePlayer || queue.length === 0) return;
   const nextKey = queue.shift();
   const display = displayNames.get(nextKey) || nextKey;
   activePlayer = nextKey;
@@ -121,6 +122,12 @@ const handleDig = tags => {
 
   // If no one is currently digging, respect cooldown before starting.
   if (!activePlayer) {
+    if (paused) {
+      queue.push(key);
+      const position = getQueuePosition(key);
+      say(`@${display} you joined the dig queue. Position: #${position}.`);
+      return;
+    }
     if (isOnCooldown(key)) {
       say(`@${display} cooldown active. Try again in a moment.`);
       return;
@@ -157,10 +164,45 @@ const startBot = async () => {
   client.on("message", async (channel, tags, message, self) => {
     if (self || !message.startsWith("!")) return;
     const command = message.trim().split(" ")[0].toLowerCase();
+    const isAdmin = tags.mod || (tags.badges && tags.badges.broadcaster === "1");
     if (command === "!dig") {
       handleDig(tags);
     } else if (command === "!stats" || command === "!points") {
       await handleStats(tags);
+    } else if (command === "!board") {
+      const parts = message.trim().split(/\s+/);
+      const n = Math.max(1, Math.min(10, parseInt(parts[1], 10) || 5));
+      const players = await getPlayers();
+      const sorted = Object.entries(players)
+        .map(([key, p]) => ({ name: p.username || key, points: p.points || 0 }))
+        .sort((a, b) => b.points - a.points)
+        .slice(0, n);
+
+      if (sorted.length === 0) {
+        say("No players yet. Use !dig to start collecting points!");
+      } else {
+        const line = sorted
+          .map((p, i) => `#${i + 1} ${p.name} (${p.points} pts)`)
+          .join(" | ");
+        say(`Top ${sorted.length}: ${line}`);
+      }
+    } else if (command === "!pause") {
+      if (!isAdmin) return;
+      if (paused) {
+        say("Queue is already paused.");
+      } else {
+        paused = true;
+        say("Queue paused by moderator. No new digs will start; queue will hold.");
+      }
+    } else if (command === "!resume") {
+      if (!isAdmin) return;
+      if (!paused) {
+        say("Queue is already running.");
+      } else {
+        paused = false;
+        say("Queue resumed by moderator. Processing will continue.");
+        startNextInQueue();
+      }
     }
   });
 };

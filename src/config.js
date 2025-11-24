@@ -13,7 +13,7 @@ export const config = {
     channel: process.env.TWITCH_CHANNEL || "your_channel_name"
   },
   cooldowns: {
-    perUserMs: 8000,
+    perUserMs: Number(process.env.PER_USER_COOLDOWN_MS || 8000),
     globalMs: 2000
   },
   overlay: {

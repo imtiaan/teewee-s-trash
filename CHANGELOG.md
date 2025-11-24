@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here.
 
+## v0.2.0 – Backups, Hotkeys Docs, Porting Note
+
+### Added
+- Automatic `players.json` backups with atomic writes and retention. Defaults: keep 30 files, 14 days. Configurable via `PLAYERS_BACKUP_MAX_FILES` and `PLAYERS_BACKUP_MAX_DAYS`.
+- Backup files stored under `data/backups/players-YYYYMMDD-HHMMSS.json` and only created when content changes.
+- Release specification updated with hotkey support and data safety notes.
+- README section on Desktop App Porting and repository separation strategy.
+
+### Changed
+- Storage writes now use atomic rename to avoid partial writes/corruption.
+- Documentation aligned around image storage under `public/img/loot` and overlay slug behavior.
+
+### Notes
+- Player data remains git-ignored in `data/players.json`; backups are also git-ignored.
+- See `docs/desktop-app-release-spec.md` for hotkeys, offline/failure modes, and QA.
+
 ## v0.1.1 – Board + Moderator Controls
 
 ### Added

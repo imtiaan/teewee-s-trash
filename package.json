@@ -1,7 +1,7 @@
 {
   "name": "trashpandah-dig-queue",
-  "version": "0.1.0",
-  "description": "Twitch chat-driven dig queue game with Liquid Glass overlay.",
+  "version": "0.2.0",
+  "description": "Hobo Hustle — Twitch chat-driven scavenging game with Liquid Glass overlay.",
   "main": "src/index.js",
   "type": "module",
   "license": "MIT",

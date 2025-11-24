@@ -1,4 +1,4 @@
-# Teewee's Trash (Dig Queue)
+# Hobo Hustle (Dig Queue)
 
 Twitch chat-driven mini-game where viewers type `!dig` to join a queue, roll GTA-flavored loot, and display animated Liquid Glass cards in OBS.
 
@@ -43,6 +43,9 @@ Overlay on a different host
 Moderator Commands (mods or broadcaster)
 - `!pause` — pause the queue; active dig continues but no new digs start.
 - `!resume` — resume processing; starts next queued dig if idle.
+- `!skip` — skip the current active dig immediately (no loot awarded).
+- `!clearqueue` — empty the waiting queue; current dig (if any) continues.
+- `!cooldown <ms|Xs>` — set per-user cooldown (e.g., `8000` or `8s`).
 
 ## How it works
 - Single active digger at a time. Others join FIFO queue (duplicates blocked).
@@ -50,6 +53,7 @@ Moderator Commands (mods or broadcaster)
 - Loot uses weighted table in `src/lootTable.js`. Value adds to points and XP.
 - Levels: `level = floor(xp / 1000) + 1` (adjust `levelStep` in config).
 - Persistence: `data/players.json`.
+- Cooldown: per-user cooldown defaults to `8000ms` and can be set via `.env` (`PER_USER_COOLDOWN_MS`) or `!cooldown`.
 - Overlay: `public/` static files; listens for WebSocket `loot` events to animate a Liquid Glass card. No audio is played.
 
 ## Structure
@@ -59,6 +63,10 @@ Moderator Commands (mods or broadcaster)
 - `src/storage.js` — persistence helpers.
 - `public/` — overlay HTML/CSS/JS.
 - `data/players.json` — saved player stats.
+  - Backups: previous versions are stored in `data/backups/players-YYYYMMDD-HHMMSS.json` when content changes.
+  - Retention: by default keeps up to 30 backups and 14 days of history.
+    - Configure with `PLAYERS_BACKUP_MAX_FILES` and `PLAYERS_BACKUP_MAX_DAYS` in `.env`.
+    - Uses atomic writes to prevent partial truncation.
 
 ## Notes
 - The bot exits if credentials are not set.
@@ -90,3 +98,10 @@ Customization
 Security & Persistence
 - `.env` is ignored by git; never commit your token.
 - Player progress persists to `data/players.json` (also git-ignored).
+
+## Desktop App Porting
+- When porting to a desktop application, use a dedicated copy/repo (e.g., `HoboHustle-Desktop`).
+- Keep this iteration (web repo) separate and unmodified during desktop development.
+- Vendor in core modules (`public/`, `src/`, `.env.example`) to the desktop copy at a known snapshot.
+- Mirror improvements back to the web repo only after the desktop copy proves stable.
+- See `docs/desktop-app-release-spec.md` → “Copy Strategy (Protect the Current Web Version)”.

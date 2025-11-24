@@ -14,8 +14,8 @@ body {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: flex-end;
+  justify-content: flex-end; /* align to right */
+  align-items: center; /* center vertically */
   padding: 48px;
   pointer-events: none;
 }
@@ -31,23 +31,28 @@ body {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(18px);
   color: #f6f6f6;
-  transform: translateY(40px);
+  transform: translateX(40px); /* slide in from right */
   opacity: 0;
   transition: opacity 0.4s ease, transform 0.45s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  /* Liquid glass accent variables by rarity */
+  --accentA: rgba(255, 255, 255, 0.08);
+  --accentB: rgba(255, 255, 255, 0.06);
+  --accentC: rgba(255, 255, 255, 0.05);
+  --glow: rgba(255, 255, 255, 0.25);
 }
 
 .card.show {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .card .accent {
   position: absolute;
   inset: -2px;
   border-radius: 20px;
-  background: radial-gradient(circle at 20% 20%, rgba(0, 163, 136, 0.35), transparent 35%),
-    radial-gradient(circle at 80% 20%, rgba(237, 223, 191, 0.2), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.08), transparent 35%);
+  background: radial-gradient(circle at 20% 20%, var(--accentA), transparent 35%),
+    radial-gradient(circle at 80% 20%, var(--accentB), transparent 40%),
+    radial-gradient(circle at 50% 80%, var(--accentC), transparent 35%);
   filter: blur(16px);
   z-index: 0;
   pointer-events: none;
@@ -59,6 +64,41 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Layout row to place thumbnail on the left */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.media {
+  flex: 0 0 88px;
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+.media.hidden { display: none; }
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0; /* allow text to wrap nicely */
 }
 
 .header {
@@ -110,41 +150,168 @@ body {
 
 .card.hidden {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translateX(40px);
+}
+
+/* Entry liquid glow using rarity color */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 24px;
+  background: radial-gradient(120% 120% at 12% 12%, var(--glow), transparent 50%);
+  filter: blur(18px);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.45s ease, filter 0.45s ease;
+}
+
+.card.show::before {
+  opacity: 0.6;
+}
+
+/* Supplemental rule to add entry animation without altering transform */
+.card.show {
+  animation: liquid-bloom 650ms ease-out;
+  will-change: transform, filter;
+}
+
+@keyframes liquid-bloom {
+  0%   { transform: translateX(0) scale(0.94); filter: brightness(1.02) contrast(1.02); }
+  28%  { transform: translateX(0) scale(1.06); filter: brightness(1.06) contrast(1.04); }
+  55%  { transform: translateX(0) scale(1.02); filter: brightness(1.03) contrast(1.02); }
+  100% { transform: translateX(0) scale(1.00); filter: brightness(1.00) contrast(1.00); }
+}
+
+/* Subtle animated sheen and float in the media box when showing */
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(120deg, transparent 45%, rgba(255, 255, 255, 0.18) 50%, transparent 55%),
+    radial-gradient(50% 60% at 20% 20%, rgba(255, 255, 255, 0.08), transparent 60%);
+  mix-blend-mode: screen;
+}
+
+.card.show .media::after {
+  opacity: 0.85;
+  animation: sheen-sweep 2400ms ease-in-out infinite;
+}
+
+.card.show .thumb {
+  animation: thumb-float 4200ms ease-in-out infinite;
+  will-change: transform;
+  filter: drop-shadow(0 0 8px var(--glow));
+}
+
+/* Gentle glow pulse using rarity variable */
+.card.show .media {
+  animation: glow-pulse 3600ms ease-in-out infinite;
+}
+
+@keyframes sheen-sweep {
+  0% { transform: translateX(-120%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(120%); }
+}
+
+@keyframes thumb-float {
+  0%   { transform: translate3d(0, 0, 0) scale(1.00); }
+  35%  { transform: translate3d(-2px, -3px, 0) scale(1.028); }
+  65%  { transform: translate3d(2px, -2px, 0) scale(1.022); }
+  100% { transform: translate3d(0, 0, 0) scale(1.00); }
+}
+
+@keyframes glow-pulse {
+  0%   { box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); }
+  50%  { box-shadow: 0 14px 32px rgba(0, 0, 0, 0.40), 0 0 18px var(--glow), inset 0 0 10px var(--glow); }
+  100% { box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .card.show .media,
+  .card.show .media::after,
+  .card.show .thumb {
+    animation: none !important;
+  }
 }
 
 /* Rarity accenting */
 .rarity-common {
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  --accentA: rgba(255, 255, 255, 0.10);
+  --accentB: rgba(255, 255, 255, 0.07);
+  --accentC: rgba(255, 255, 255, 0.05);
+  --glow: rgba(255, 255, 255, 0.28);
 }
 
 .rarity-uncommon {
   border-color: rgba(0, 163, 136, 0.6);
   box-shadow: 0 18px 40px rgba(0, 163, 136, 0.35);
+  --accentA: rgba(0, 163, 136, 0.35);
+  --accentB: rgba(0, 163, 136, 0.20);
+  --accentC: rgba(255, 255, 255, 0.08);
+  --glow: rgba(0, 163, 136, 0.45);
+}
+
+.rarity-uncommon .media {
+  border-color: rgba(0, 163, 136, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 163, 136, 0.35);
 }
 
 .rarity-rare {
   border-color: rgba(129, 90, 247, 0.7);
   box-shadow: 0 18px 40px rgba(129, 90, 247, 0.45);
+  --accentA: rgba(129, 90, 247, 0.35);
+  --accentB: rgba(129, 90, 247, 0.25);
+  --accentC: rgba(255, 255, 255, 0.08);
+  --glow: rgba(129, 90, 247, 0.55);
+}
+
+.rarity-rare .media {
+  border-color: rgba(129, 90, 247, 0.6);
+  box-shadow: 0 12px 28px rgba(129, 90, 247, 0.40);
 }
 
 .rarity-ultra-rare {
   border-color: rgba(237, 223, 191, 0.9);
   box-shadow: 0 20px 55px rgba(237, 223, 191, 0.55);
+  --accentA: rgba(237, 223, 191, 0.55);
+  --accentB: rgba(237, 223, 191, 0.35);
+  --accentC: rgba(255, 255, 255, 0.10);
+  --glow: rgba(237, 223, 191, 0.70);
+}
+
+.rarity-ultra-rare .media {
+  border-color: rgba(237, 223, 191, 0.8);
+  box-shadow: 0 14px 32px rgba(237, 223, 191, 0.45);
 }
 
 @media (max-width: 640px) {
   #overlay {
     padding: 24px;
     align-items: center;
+    justify-content: flex-end; /* keep right alignment on mobile */
   }
 
   .card {
-    min-width: 320px;
+    min-width: 340px;
   }
 
   .values {
     grid-template-columns: 1fr;
+  }
+
+  .media {
+    flex-basis: 72px;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
   }
 }
